@@ -1,3 +1,4 @@
+
 # Models Directory
 
 ## Purpose
@@ -32,6 +33,37 @@ A **model** in Mongoose is a JavaScript class that interacts with a specific Mon
   - `name` (String): The user’s full name.
   - `avatar` (String): URL of the user’s profile picture.
 
+#### Password Security
+
+The `password` field in the `User` model is hashed before being saved to the database to ensure security. This is achieved using the `bcrypt` library:
+
+- **Hashing Passwords**:
+  - Before saving a user document, the `pre("save")` middleware automatically hashes the raw password using `bcrypt.hash(password, 10)`.
+  - This ensures raw passwords are never stored in the database.
+
+- **Comparing Passwords**:
+  - The `comparePassword` method is used to validate a user’s password during login.
+  - It compares the candidate password (entered by the user) with the hashed password stored in the database using `bcrypt.compare()`.
+
+#### Example Code
+```javascript
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next(); // Skip hashing if the password is not modified
+  }
+  try {
+    this.password = await bcrypt.hash(this.password, 10); // Hash password
+    next();
+  } catch (err) {
+    next(err); // Pass errors to the next middleware
+  }
+});
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+```
+
 ## How to Add a New Model
 
 1. Create a new file in the `models` directory (e.g., `MyModel.js`).
@@ -48,3 +80,5 @@ A **model** in Mongoose is a JavaScript class that interacts with a specific Mon
 
    module.exports = MyModel;
    ```
+3. Add any additional methods or middleware as needed.
+
