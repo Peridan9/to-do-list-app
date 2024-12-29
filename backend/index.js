@@ -5,6 +5,11 @@ const bodyParser = require("body-parser");
 const authRoutes = require("./routes/auth");
 const tasksRoutes = require("./routes/tasks");
 
+// Require db.js (conditionally for non-test environments)
+if (process.env.NODE_ENV !== "test") {
+  require("./db");
+}
+
 const app = express();
 const PORT = 5000;
 
