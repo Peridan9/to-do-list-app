@@ -35,10 +35,27 @@ router.post("/login", async (req,res) => {
             return res.status(401).json({message:"Invalid credentials"});
         }
 
-        res.status(200).json({message:"Login successful",user});
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+        };
+
+
+        res.status(200).json({message:"Login successful",user: req.session.user});
     } catch(err){
         res.status(500).json({message: err.message});
     }
+});
+
+router.post("/logout", (req,res) => {
+    req.session.destroy((err) => {
+        if(err){
+            return res.status(500).json({ message: "Logout Failed"});
+        }
+        res.clearCookie("connect.sid"); // Clear the session cookie
+        res.status(200).json({message: "Logout Successful"});
+    });
 });
 
 

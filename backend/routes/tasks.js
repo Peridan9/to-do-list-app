@@ -2,8 +2,18 @@ const express = require("express");
 const router = express.Router();
 const Task = require("../models/Task");
 
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.user) {
+    return next();
+  }
+  return res.status(401).json({ message: "Unauthorized" });
+};
+
+// Protect all task routes
+router.use(isAuthenticated)
+
 router.get("/", async (req,res) => {
-  const userId = req.query.user_id;
+  const userId = req.session.user.id;
 
   try {
     const tasks = await Task.find({user_id: userId});
@@ -15,7 +25,8 @@ router.get("/", async (req,res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { title, description, status, due_date, user_id } = req.body;
+  const { title, description, status, due_date} = req.body;
+  const user_id = req.session.user.id
 
   try {
     const newTask = new Task({ title, description, status, due_date, user_id });

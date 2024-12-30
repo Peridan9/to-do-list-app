@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const session = require("express-session");
 
 const authRoutes = require("./routes/auth");
 const tasksRoutes = require("./routes/tasks");
@@ -16,6 +17,18 @@ const PORT = 5000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: 'myStrongSecretKey123!',
+    resave: false, // Prevent session resaving if unmodified
+    saveUninitialized: false, // Prevent saving uninitialized session
+    cookie: {
+      httpOnly: true, // prevent client-side JavaScript access
+      secure: false, // Set to ture if using HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // Cookie expiry (1 day)
+    },
+  })
+);
 
 // Routes
 app.use("/users", authRoutes);
